@@ -13,7 +13,6 @@
 @interface HeartRateMonitorManager()
 
 @property (nonatomic, strong) CBCentralManager *manager;
-@property (nonatomic, strong) HeartRateMonitorDevice *connectedHeartRateMonitorDevice;
 
 @end
 
@@ -199,18 +198,19 @@
     NSLog(@"### Connected %@", heartRateMonitorDevice.name);
     
     NSMutableArray *storedHeartRateMonitorDeviceIndentifierStrings = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"storedHeartRateMonitorDeviceIndentifierStrings"]];
-    BOOL notIn = YES;
+    NSString *deviceIdentifier = nil;
     for (NSString *heartRateMonitorDeviceIndentifierString in storedHeartRateMonitorDeviceIndentifierStrings) {
         NSLog(@"### %@ == %@", heartRateMonitorDeviceIndentifierString, [peripheral.identifier UUIDString]);
         if ([heartRateMonitorDeviceIndentifierString isEqualToString:[peripheral.identifier UUIDString]]) {
-            notIn = NO;
+            deviceIdentifier = heartRateMonitorDeviceIndentifierString;
         }
     }
-    if (notIn) {
+    if (deviceIdentifier != nil) {
+        [storedHeartRateMonitorDeviceIndentifierStrings removeObject:deviceIdentifier];
+    }
         [storedHeartRateMonitorDeviceIndentifierStrings addObject:[peripheral.identifier UUIDString]];
         [[NSUserDefaults standardUserDefaults] setObject:storedHeartRateMonitorDeviceIndentifierStrings forKey:@"storedHeartRateMonitorDeviceIndentifierStrings"];
         [[NSUserDefaults standardUserDefaults] synchronize];
-    }
     
     self.connectedHeartRateMonitorDevice = heartRateMonitorDevice;
     [heartRateMonitorDevice prepareForMonitoring];

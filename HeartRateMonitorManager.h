@@ -28,6 +28,7 @@ typedef NS_ENUM(NSInteger, HeartRateMonitorManagerState) {
 @property (nonatomic, weak) id<HeartRateMonitorManagerDelegate> delegate;
 @property (nonatomic) HeartRateMonitorManagerState state;
 @property (nonatomic, readonly) BOOL hasConnection;
+@property (nonatomic, strong) HeartRateMonitorDevice *connectedHeartRateMonitorDevice;
 @property (nonatomic) HeartRateMonitorDeviceState deviceState;
 
 - (void)scanForHeartRateMonitorDeviceWhichWereConnected:(BOOL)wereConnected;
