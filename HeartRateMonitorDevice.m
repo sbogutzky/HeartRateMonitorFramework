@@ -18,6 +18,8 @@
 @interface HeartRateMonitorDevice ()
 
 @property (nonatomic, strong) CBCharacteristic *characteristic;
+@property (nonatomic, assign) NSTimeInterval timestamp;
+@property (nonatomic, assign) BOOL first;
 
 @end
 
@@ -52,6 +54,9 @@
 - (void)startMonitoring
 {
     if (self.state == HeartRateMonitorDeviceStatePrepared) {
+        self.first = YES;
+        self.monitorStartDate = [NSDate date];
+        self.timestamp = 0.0;
         self.state = HeartRateMonitorDeviceStateMonitoring;
         [self.peripheral setNotifyValue:YES forCharacteristic:self.characteristic];
     }
@@ -103,6 +108,12 @@ didDiscoverCharacteristicsForService:(CBService *)service
 
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
     if (!error) {
+        
+        if (self.first) {
+            self.timestamp = abs([self.monitorStartDate timeIntervalSinceNow]);
+            self.first = NO;
+        }
+        
         NSData *data = characteristic.value;
         const uint8_t *reportData = [data bytes];
         uint8_t flagByte = reportData[0];
@@ -149,7 +160,6 @@ didDiscoverCharacteristicsForService:(CBService *)service
             _energyExpendedFieldIsPresent = YES;
         }
         
-        
         // One or more RR-Interval values are present. Units: 1/1024 seconds
         if ((flagByte & RRIntervalFlag) == 0) {
             NSLog(@"### RR-Interval values are not present.");
@@ -158,7 +168,6 @@ didDiscoverCharacteristicsForService:(CBService *)service
             NSLog(@"### One or more RR-Interval values are present. Units: 1/1024 seconds");
             _rrIntervalsArePresent = YES;
         }
-        
         
         int heartRate = -1;
         if (_heartRateIs16Bit) {
@@ -198,11 +207,67 @@ didDiscoverCharacteristicsForService:(CBService *)service
             int rrInterval2 = rrIntervalByte4 << 8 | rrIntervalByte3;
             NSLog(@"### RR-Interval 2: %d", rrInterval2);
             
-            if (rrInterval2 > 0) {
-                heartRateMonitorData.rrIntervals = @[[NSNumber numberWithInteger:rrInterval1], [NSNumber numberWithInteger:rrInterval2]];
-            } else {
-                heartRateMonitorData.rrIntervals = @[[NSNumber numberWithInteger:rrInterval1]];
+            uint8_t rrIntervalByte5 = reportData[firstRRInterval + 4];
+            uint8_t rrIntervalByte6 = reportData[firstRRInterval + 5];
+            int rrInterval3 = rrIntervalByte6 << 8 | rrIntervalByte5;
+            NSLog(@"### RR-Interval 3: %d", rrInterval3);
+            
+            uint8_t rrIntervalByte7 = reportData[firstRRInterval + 6];
+            uint8_t rrIntervalByte8 = reportData[firstRRInterval + 7];
+            int rrInterval4 = rrIntervalByte8 << 8 | rrIntervalByte7;
+            NSLog(@"### RR-Interval 4: %d", rrInterval4);
+            
+            uint8_t rrIntervalByte9 = reportData[firstRRInterval + 8];
+            uint8_t rrIntervalByte10 = reportData[firstRRInterval + 9];
+            int rrInterval5 = rrIntervalByte10 << 8 | rrIntervalByte9;
+            NSLog(@"### RR-Interval 5: %d", rrInterval5);
+            
+            
+            NSMutableArray *rrT = [NSMutableArray arrayWithCapacity:5];
+            NSMutableArray *rrI = [NSMutableArray arrayWithCapacity:5];
+            if (rrInterval1 > 0) {
+                double rrInterval = rrInterval1 / 1024.0;
+                double rrTime = self.timestamp;
+                self.timestamp = self.timestamp + rrInterval;
+                [rrT addObject:[NSNumber numberWithDouble:rrTime]];
+                [rrI addObject:[NSNumber numberWithDouble:rrInterval]];
             }
+            
+            if (rrInterval2 > 0) {
+                double rrInterval = rrInterval2 / 1024.0;
+                double rrTime = self.timestamp;
+                self.timestamp = self.timestamp + rrInterval;
+                [rrT addObject:[NSNumber numberWithDouble:rrTime]];
+                [rrI addObject:[NSNumber numberWithDouble:rrInterval]];
+            }
+            
+            if (rrInterval3 > 0) {
+                double rrInterval = rrInterval3 / 1024.0;
+                double rrTime = self.timestamp;
+                self.timestamp = self.timestamp + rrInterval;
+                [rrT addObject:[NSNumber numberWithDouble:rrTime]];
+                [rrI addObject:[NSNumber numberWithDouble:rrInterval]];
+            }
+            
+            if (rrInterval4 > 0) {
+                double rrInterval = rrInterval4 / 1024.0;
+                double rrTime = self.timestamp;
+                self.timestamp = self.timestamp + rrInterval;
+                [rrT addObject:[NSNumber numberWithDouble:rrTime]];
+                [rrI addObject:[NSNumber numberWithDouble:rrInterval]];
+            }
+            
+            if (rrInterval5 > 0) {
+                double rrInterval = rrInterval5 / 1024.0;
+                double rrTime = self.timestamp;
+                self.timestamp = self.timestamp + rrInterval;
+                [rrT addObject:[NSNumber numberWithDouble:rrTime]];
+                [rrI addObject:[NSNumber numberWithDouble:rrInterval]];
+            }
+            
+            heartRateMonitorData.rrTimes = [[NSArray alloc] initWithArray:rrT];
+            heartRateMonitorData.rrIntervals = [[NSArray alloc] initWithArray:rrI];
+            heartRateMonitorData.timestamp = fabs([self.monitorStartDate timeIntervalSinceNow]);
         }
         
         NSLog(@"### ---< %@ >---", heartRateMonitorData);

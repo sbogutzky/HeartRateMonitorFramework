@@ -10,7 +10,8 @@
 
 @interface HeartRateMonitorData : NSObject
 
-@property (nonatomic) double timestamp;
+@property (nonatomic, assign) double timestamp;
+@property (nonatomic, strong) NSArray *rrTimes;
 @property (nonatomic, strong, readonly) NSString *timestampUnit;
 @property (nonatomic) int heartRate;
 @property (nonatomic, strong, readonly) NSString *heartRateUnit;

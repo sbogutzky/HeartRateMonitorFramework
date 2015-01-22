@@ -10,13 +10,9 @@
 
 @implementation HeartRateMonitorData
 
-- (id)init
+- (NSString *)heartRateUnit
 {
-    self = [super init];
-    if (self) {
-        self.timestamp = [[NSDate date] timeIntervalSince1970];
-    }
-    return self;
+    return @"BPM";
 }
 
 - (NSString *)timestampUnit
@@ -24,19 +20,9 @@
     return @"s";
 }
 
-- (NSString *)heartRateUnit
-{
-    return @"BPM";
-}
-
 - (NSString *)rrIntervalUnit
 {
-    return @"ms";
-}
-
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"%.2f%@ : %d %@ (%@)", self.timestamp, self.timestampUnit, self.heartRate, self.heartRateUnit, [self.rrIntervals componentsJoinedByString:[NSString stringWithFormat:@"%@, ", self.rrIntervalUnit]]];
+    return @"s";
 }
 
 @end

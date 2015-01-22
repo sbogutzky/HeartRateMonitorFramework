@@ -27,6 +27,7 @@ typedef NS_ENUM(NSInteger, HeartRateMonitorDeviceState) {
 @property (nonatomic, readonly) BOOL energyExpendedFieldIsPresent;
 @property (nonatomic, readonly) BOOL sensorContactIsPresent;
 @property (nonatomic, readonly) BOOL rrIntervalsArePresent;
+@property (nonatomic, strong) NSDate *monitorStartDate;
 
 - (id)initWithPeripheral:(CBPeripheral *)peripheral;
 - (void)prepareForMonitoring;
