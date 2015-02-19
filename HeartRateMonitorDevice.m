@@ -201,11 +201,14 @@ didDiscoverCharacteristicsForService:(CBService *)service
                 uint8_t rrIntervalByte2 = reportData[offset + 1];
                 int rrInterval = rrIntervalByte2 << 8 | rrIntervalByte1;
                 NSLog(@"### RR-Interval %d: %d", i, rrInterval);
-                double rrIntervalS = rrInterval / 1024.0;
-                double rrTime = self.timestamp;
-                self.timestamp = self.timestamp + rrIntervalS;
-                [rrT addObject:[NSNumber numberWithDouble:rrTime]];
-                [rrI addObject:[NSNumber numberWithDouble:rrIntervalS]];
+                if (rrInterval > 0) {
+                    double rrIntervalS = rrInterval / 1024.0;
+                    double rrTime = self.timestamp;
+                    self.timestamp = self.timestamp + rrIntervalS;
+                
+                    [rrT addObject:[NSNumber numberWithDouble:rrTime]];
+                    [rrI addObject:[NSNumber numberWithDouble:rrIntervalS]];
+                }
                 
                 offset += 2;
             }
