@@ -110,13 +110,13 @@ didDiscoverCharacteristicsForService:(CBService *)service
     if (!error) {
         
         if (self.first) {
-            self.timestamp = abs([self.monitorStartDate timeIntervalSinceNow]);
+            self.timestamp = fabs([self.monitorStartDate timeIntervalSinceNow]);
             self.first = NO;
         }
         
         NSData *data = characteristic.value;
-        int dataSize = data.length;
-        NSLog(@"### Size: %d", dataSize);
+        NSUInteger dataSize = data.length;
+        NSLog(@"### Size: %lu", (unsigned long)dataSize);
         const uint8_t *reportData = [data bytes];
         uint8_t flagByte = reportData[0];
         
@@ -196,9 +196,9 @@ didDiscoverCharacteristicsForService:(CBService *)service
             }
         
             // NSLog(@"### First RR-Interval Byte: %d", offset);
-            int rrIntervalCount = (dataSize - offset) / 2;
+            NSUInteger rrIntervalCount = (dataSize - offset) / 2;
         
-            NSLog(@"### RR-Interval Count: %d", rrIntervalCount);
+            NSLog(@"### RR-Interval Count: %lu", (unsigned long)rrIntervalCount);
             
             NSMutableArray *rrT = [NSMutableArray arrayWithCapacity:rrIntervalCount];
             NSMutableArray *rrI = [NSMutableArray arrayWithCapacity:rrIntervalCount];
