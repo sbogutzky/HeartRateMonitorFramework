@@ -46,8 +46,7 @@
 {
     if (self.peripheral) {
         self.peripheral.delegate = self;
-        CBUUID *heartRateServiceUUID = [CBUUID UUIDWithString:@"180D"];
-        [self.peripheral discoverServices:@[heartRateServiceUUID]];
+        [self.peripheral discoverServices:nil];
     }
 }
 
@@ -73,9 +72,11 @@
 - (void)peripheral:(CBPeripheral *)peripheral
 didDiscoverServices:(NSError *)error {
     for (CBService *service in peripheral.services) {
-        // NSLog(@"### Discovered services %@", service.UUID);
-        CBUUID *heartRateCharacteristicUUID = [CBUUID UUIDWithString:@"2A37"];
-        [peripheral discoverCharacteristics:@[heartRateCharacteristicUUID] forService:service];
+        NSLog(@"### Discovered services %@", service.UUID);
+        if ([service.UUID.description isEqualToString:@"BEFDFF20-C979-11E1-9B21-0800200C9A66"]) {
+            CBUUID *heartRateCharacteristicUUID = [CBUUID UUIDWithString:@"BEFDFF60-C979-11E1-9B21-0800200C9A66"];
+            [peripheral discoverCharacteristics:@[heartRateCharacteristicUUID] forService:service];
+        }
     }
     
     if (error) {
@@ -88,7 +89,7 @@ didDiscoverServices:(NSError *)error {
 didDiscoverCharacteristicsForService:(CBService *)service
              error:(NSError *)error {
     for (CBCharacteristic *characteristic in service.characteristics) {
-        // NSLog(@"### Characteristic: %@", characteristic.UUID);
+        NSLog(@"### Characteristic: %@", characteristic.UUID);
         self.characteristic = characteristic;
         self.state = HeartRateMonitorDeviceStatePrepared;
     }
@@ -118,117 +119,12 @@ didDiscoverCharacteristicsForService:(CBService *)service
         int dataSize = data.length;
         NSLog(@"### Size: %d", dataSize);
         const uint8_t *reportData = [data bytes];
-        uint8_t flagByte = reportData[0];
         
-        // Heart Rate Value
-        if ((flagByte & HeartRateValueFormatFlag) == 0) {
-            // NSLog(@"### Heart Rate Value Format is set to UINT8. Units: beats per minute (bpm)");
-            _heartRateIs16Bit = NO;
-        } else {
-            // NSLog(@"### Heart Rate Value Format is set to UINT16. Units: beats per minute (bpm)");
-            _heartRateIs16Bit = YES;
-        }
-        
-        // Sensor Contact Status
-        _sensorContactIsPresent = NO;
-        switch ((flagByte & SensorContactStatusFlag)) {
-            case 0:
-                // NSLog(@"### Sensor Contact feature is not supported in the current connection");
-                break;
-            
-            case 2:
-                // NSLog(@"### Sensor Contact feature is not supported in the current connection");
-                break;
-            
-            case 4 :
-                // NSLog(@"### Sensor Contact feature is supported, but contact is not detected");
-                break;
-            
-            case 6:
-                // NSLog(@"### Sensor Contact feature is supported and contact is detected");
-                _sensorContactIsPresent = YES;
-                break;
-                
-            default:
-                break;
-        }
-        
-        // Energy Expended Status
-        if ((flagByte & EnergyExpendedStatusFlag) == 0) {
-            // NSLog(@"### Energy Expended field is not present");
-            _energyExpendedFieldIsPresent = NO;
-        } else {
-            // NSLog(@"### Energy Expended field is present. Units: kilo Joules");
-            _energyExpendedFieldIsPresent = YES;
-        }
-        
-        // One or more RR-Interval values are present. Units: 1/1024 seconds
-        if ((flagByte & RRIntervalFlag) == 0) {
-            // NSLog(@"### RR-Interval values are not present.");
-            _rrIntervalsArePresent = NO;
-        } else {
-            // NSLog(@"### One or more RR-Interval values are present. Units: 1/1024 seconds");
-            _rrIntervalsArePresent = YES;
-        }
-        
-        int heartRate = -1;
-        if (_heartRateIs16Bit) {
-            uint8_t heartRateByte1 = reportData[1];
-            uint8_t heartRateByte2 = reportData[2];
-            heartRate = heartRateByte2 << 8 | heartRateByte1;
-            NSLog(@"### Heart rate: %d", heartRate);
-        } else {
-            heartRate = reportData[1];
-            NSLog(@"### Heart rate: %d", heartRate);
-        }
-        
-        HeartRateMonitorData *heartRateMonitorData = [[HeartRateMonitorData alloc] init];
-        heartRateMonitorData.heartRate = heartRate;
-        
-        if (_rrIntervalsArePresent) {
-            uint8_t offset = 2;
-            if (_heartRateIs16Bit) {
-                offset++;
-            }
-        
-            if (_energyExpendedFieldIsPresent) {
-                offset += 2;
-            }
-        
-            // NSLog(@"### First RR-Interval Byte: %d", offset);
-            int rrIntervalCount = (dataSize - offset) / 2;
-        
-            NSLog(@"### RR-Interval Count: %d", rrIntervalCount);
-            
-            NSMutableArray *rrT = [NSMutableArray arrayWithCapacity:rrIntervalCount];
-            NSMutableArray *rrI = [NSMutableArray arrayWithCapacity:rrIntervalCount];
-            
-            for (int i = 0; i < rrIntervalCount; i++) {
-                uint8_t rrIntervalByte1 = reportData[offset];
-                uint8_t rrIntervalByte2 = reportData[offset + 1];
-                int rrIntervalInMillis = rrIntervalByte2 << 8 | rrIntervalByte1;
-                NSLog(@"### RR-Interval %d: %d", i, rrIntervalInMillis);
-                if (rrIntervalInMillis > 0) {
-                    double rrIntervalInSeconds = rrIntervalInMillis / 1024.0;
-                    double rrTime = self.timestamp;
-                    self.timestamp = self.timestamp + rrIntervalInSeconds;
-                    [rrT addObject:[NSNumber numberWithDouble:rrTime]];
-                    [rrI addObject:[NSNumber numberWithDouble:rrIntervalInSeconds]];
-                }
+        uint8_t heartRateByte1 = reportData[3];
+        uint8_t heartRateByte2 = reportData[4];
+        int heartRate = heartRateByte2 << 8 | heartRateByte1;
+        NSLog(@"### Heart rate: %d", heartRate);
 
-                offset += 2;
-            }
-            
-            heartRateMonitorData.rrTimes = [[NSArray alloc] initWithArray:rrT];
-            heartRateMonitorData.rrIntervals = [[NSArray alloc] initWithArray:rrI];
-            heartRateMonitorData.timestamp = fabs([self.monitorStartDate timeIntervalSinceNow]);
-        }
-        
-        // NSLog(@"### ---< %@ >---", heartRateMonitorData);
-        
-        if ([_delegate respondsToSelector:@selector(heartRateMonitorDevice:didreceiveHeartrateMonitorData:)]) {
-            [_delegate heartRateMonitorDevice:self didreceiveHeartrateMonitorData:heartRateMonitorData];
-        }
     }
 }
 
