@@ -111,21 +111,32 @@ didDiscoverCharacteristicsForService:(CBService *)service
     if (!error) {
         
         if (self.first) {
-            self.timestamp = abs([self.monitorStartDate timeIntervalSinceNow]);
+            self.timestamp = fabs([self.monitorStartDate timeIntervalSinceNow]);
             self.first = NO;
         }
         
         NSData *data = characteristic.value;
-        int dataSize = data.length;
-        NSLog(@"### Size: %d", dataSize);
-        const uint8_t *reportData = [data bytes];
+        NSUInteger dataSize = data.length;
+        NSLog(@"### Size: %lu", dataSize);
         
-        uint8_t heartRateByte1 = reportData[3];
-        uint8_t heartRateByte2 = reportData[4];
-        int heartRate = heartRateByte2 << 8 | heartRateByte1;
-        NSLog(@"### Heart rate: %d", heartRate);
+        int p = [self getPosture:[data bytes]];
+        NSLog(@"### Heart rate: %d", p);
 
     }
+}
+
+- (int)getPosture:(const uint8_t *)payload
+{
+    for (int i = 0; i < 23; i++) {
+        short posture = (short)(payload[i]);
+        NSLog(@"%d %d", i, posture);
+    }
+    // 3 ist Heartrate
+    
+    short posture = (short)(payload[9]);
+    posture = (short)(posture | payload[10] << 8);
+    
+    return posture;
 }
 
 @end
