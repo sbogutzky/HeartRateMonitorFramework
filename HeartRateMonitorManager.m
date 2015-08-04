@@ -34,21 +34,22 @@
 
 - (void)scanForHeartRateMonitorDeviceWhichWereConnected:(BOOL)wereConnected
 {
-//    CBUUID *heartRateServiceUUID = [CBUUID UUIDWithString:@"180A"];
+    CBUUID *heartRateServiceUUID = [CBUUID UUIDWithString:@"180A"];
+    CBUUID *bioharness3ServiceUUIF = [CBUUID UUIDWithCFUUID:@"BEFDFF20-C979-11E1-9B21-0800200C9A66"];
     switch (self.state) {
         case CBCentralManagerStatePoweredOn: {
             
             NSArray *peripherals;
-//            if (wereConnected) {
-//                NSMutableArray *storedHeartRateMonitorDeviceIndentifierStrings = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"storedHeartRateMonitorDeviceIndentifierStrings"]];
-//                NSMutableArray *heartRateMonitorDeviceIndentifiers = [[NSMutableArray alloc] initWithCapacity:[storedHeartRateMonitorDeviceIndentifierStrings count]];
-//                for (NSString *storedHeartRateMonitorDeviceIndentifierString in storedHeartRateMonitorDeviceIndentifierStrings) {
-//                    [heartRateMonitorDeviceIndentifiers addObject:[CBUUID UUIDWithString:storedHeartRateMonitorDeviceIndentifierString]];
-//                }
-//                
-//                peripherals = [self.manager retrievePeripheralsWithIdentifiers:heartRateMonitorDeviceIndentifiers];
-//                [self didDiscoverPeripherals:peripherals];
-//            }
+            if (wereConnected) {
+                NSMutableArray *storedHeartRateMonitorDeviceIndentifierStrings = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"storedHeartRateMonitorDeviceIndentifierStrings"]];
+                NSMutableArray *heartRateMonitorDeviceIndentifiers = [[NSMutableArray alloc] initWithCapacity:[storedHeartRateMonitorDeviceIndentifierStrings count]];
+                for (NSString *storedHeartRateMonitorDeviceIndentifierString in storedHeartRateMonitorDeviceIndentifierStrings) {
+                    [heartRateMonitorDeviceIndentifiers addObject:[CBUUID UUIDWithString:storedHeartRateMonitorDeviceIndentifierString]];
+                }
+                
+                peripherals = [self.manager retrievePeripheralsWithIdentifiers:heartRateMonitorDeviceIndentifiers];
+                [self didDiscoverPeripherals:peripherals];
+            }
             
             if (peripherals == nil || [peripherals count] == 0) {
                 [self.manager scanForPeripheralsWithServices:nil options:nil];
@@ -174,7 +175,6 @@
     NSMutableArray *heartRateMonitorDevices = [[NSMutableArray alloc] initWithCapacity:[peripherals count]];
     for (CBPeripheral *peripheral in peripherals) {
         HeartRateMonitorDevice *heartRateMonitorDevice = [[HeartRateMonitorDevice alloc] initWithPeripheral:peripheral];
-        
         NSLog(@"### Discovered %@", heartRateMonitorDevice.name);
         [heartRateMonitorDevices addObject:heartRateMonitorDevice];
     }

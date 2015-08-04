@@ -110,6 +110,8 @@ didDiscoverCharacteristicsForService:(CBService *)service
 - (void)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(NSError *)error {
     if (!error) {
         
+        NSLog(@"CBCharacteristic", characteristic);
+        
         if (self.first) {
             self.timestamp = fabs([self.monitorStartDate timeIntervalSinceNow]);
             self.first = NO;
@@ -119,24 +121,31 @@ didDiscoverCharacteristicsForService:(CBService *)service
         NSUInteger dataSize = data.length;
         NSLog(@"### Size: %lu", dataSize);
         
-        int p = [self getPosture:[data bytes]];
-        NSLog(@"### Heart rate: %d", p);
-
+        int p = [self getRespirationRate:[data bytes]];
+        NSLog(@"### Respiration Rate: %d", p);
+        
+        if ([_delegate respondsToSelector:@selector(heartRateMonitorDevice:didreceiveHeartrateMonitorData:)]) {
+            [_delegate heartRateMonitorDevice:self didreceiveHeartrateMonitorData:nil];
+        }
     }
 }
 
-- (int)getPosture:(const uint8_t *)payload
+- (double)getRespirationRate:(const uint8_t *)payload
 {
-    for (int i = 0; i < 23; i++) {
-        short posture = (short)(payload[i]);
-        NSLog(@"%d %d", i, posture);
-    }
-    // 3 ist Heartrate
+//    for (int i = 0; i < 23; i++) {
+//        short posture = (short)(payload[i]);
+//        NSLog(@"%d %d", i, posture);
+//    }
+//    // 3 ist Heartrate
+        // 4 ist Respiration Rate 2 Bytes
+        // 6 ist Skintemperatur
+    int i = self.testByte;
+    NSLog(@"### Tested Byte %d", self.testByte);
+    short respRate1x = (short)(payload[i + 1] << 8);
+    short respRate11 = (short)(payload[i]);
+    double respirationRate = (double)(respRate1x | respRate11) / 10.0;
     
-    short posture = (short)(payload[9]);
-    posture = (short)(posture | payload[10] << 8);
-    
-    return posture;
+    return respRate11;
 }
 
 @end
