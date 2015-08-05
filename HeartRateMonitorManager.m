@@ -34,8 +34,8 @@
 
 - (void)scanForHeartRateMonitorDeviceWhichWereConnected:(BOOL)wereConnected
 {
-    CBUUID *heartRateServiceUUID = [CBUUID UUIDWithString:@"180A"];
-    CBUUID *bioharness3ServiceUUIF = [CBUUID UUIDWithCFUUID:@"BEFDFF20-C979-11E1-9B21-0800200C9A66"];
+    CBUUID *heartRateServiceUUID = [CBUUID UUIDWithString:@"180D"];
+    CBUUID *bioharness3ServiceUUID = [CBUUID UUIDWithString:@"BEFDFF20-C979-11E1-9B21-0800200C9A66"];
     switch (self.state) {
         case CBCentralManagerStatePoweredOn: {
             
@@ -52,7 +52,7 @@
             }
             
             if (peripherals == nil || [peripherals count] == 0) {
-                [self.manager scanForPeripheralsWithServices:nil options:nil];
+                [self.manager scanForPeripheralsWithServices:@[heartRateServiceUUID, bioharness3ServiceUUID] options:nil];
             }
         }
             break;
@@ -201,7 +201,7 @@
     NSMutableArray *storedHeartRateMonitorDeviceIndentifierStrings = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"storedHeartRateMonitorDeviceIndentifierStrings"]];
     NSString *deviceIdentifier = nil;
     for (NSString *heartRateMonitorDeviceIndentifierString in storedHeartRateMonitorDeviceIndentifierStrings) {
-        NSLog(@"### %@ == %@", heartRateMonitorDeviceIndentifierString, [peripheral.identifier UUIDString]);
+//        NSLog(@"### %@ == %@", heartRateMonitorDeviceIndentifierString, [peripheral.identifier UUIDString]);
         if ([heartRateMonitorDeviceIndentifierString isEqualToString:[peripheral.identifier UUIDString]]) {
             deviceIdentifier = heartRateMonitorDeviceIndentifierString;
         }
