@@ -21,5 +21,6 @@ FOUNDATION_EXPORT const unsigned char HeartRateMonitorFrameworkVersionString[];
 #import <HeartRateMonitorFramework/HeartRateMonitorDevice.h>
 #import <HeartRateMonitorFramework/HeartRateMonitorDeviceDelegate.h>
 #import <HeartRateMonitorFramework/HeartRateMonitorData.h>
+#import <HeartRateMonitorFramework/BioharnessData.h>
 
 

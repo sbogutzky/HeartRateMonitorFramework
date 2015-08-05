@@ -9,6 +9,7 @@
 #import "HeartRateMonitorDevice.h"
 #import "HeartRateMonitorDeviceDelegate.h"
 #import "HeartRateMonitorData.h"
+#import "BioharnessData.h"
 
 #define HeartRateValueFormatFlag    0x01
 #define SensorContactStatusFlag     0x06
@@ -252,26 +253,33 @@ didDiscoverCharacteristicsForService:(CBService *)service
         }
         
         if ([characteristic.UUID.description isEqualToString:@"BEFDFF60-C979-11E1-9B21-0800200C9A66"]) {
-            // 3 ist Heartrate
-            // 4 ist Respiration Rate 2 Bytes
-            // 6 ist Skintemperatur 2 Bytes
+            BioharnessData *bioharnessData = [[BioharnessData alloc] init];
+            bioharnessData.heartRate = [self getUnsigned8BitNumberWithPos:3 fromPlayload:[data bytes]];
+            bioharnessData.breathRate = [self getUnsigned16BitNumberWithPos:4 fromPlayload:[data bytes]] / 10.0;
+            bioharnessData.skinTemperatur = [self getUnsigned16BitNumberWithPos:6 fromPlayload:[data bytes]] / 10.0;
+            bioharnessData.posture = [self get16BitNumberWithPos:8 fromPlayload:[data bytes]];
+            bioharnessData.activityLevel = [self getUnsigned16BitNumberWithPos:10 fromPlayload:[data bytes]] / 100.0;
             
-//            NSLog(@"### Heartrate: %d", [self get8BitNumberWithPos:3 fromPlayload:[data bytes]]);
-//            NSLog(@"### Respiration rate: %.1f", [self get16BitNumberWithPos:4 fromPlayload:[data bytes]] / 10.0);
-//            NSLog(@"### Skintemperatur: %.1f", [self get16BitNumberWithPos:6 fromPlayload:[data bytes]] / 10.0);
-            
-            NSLog(@"Tested Pos %d ( 8 bit): %d", self.testByte, [self get8BitNumberWithPos:self.testByte fromPlayload:[data bytes]]);
-            NSLog(@"Tested Pos %d (16 bit): %d", self.testByte, [self get16BitNumberWithPos:self.testByte fromPlayload:[data bytes]]);
+            if ([_delegate respondsToSelector:@selector(heartRateMonitorDevice:didReceiveBioharnessData:)]) {
+                [_delegate heartRateMonitorDevice:self didReceiveBioharnessData:bioharnessData];
+            }
         }
     }
 }
 
-- (int)get8BitNumberWithPos:(int)pos fromPlayload:(const uint8_t *)payload
+- (unsigned int)getUnsigned8BitNumberWithPos:(int)pos fromPlayload:(const uint8_t *)payload
 {
-    return (int)(payload[pos]);
+    return (unsigned int)(payload[pos]);
 }
 
-- (int)get16BitNumberWithPos:(int)pos fromPlayload:(const uint8_t *)payload
+- (unsigned int)getUnsigned16BitNumberWithPos:(int)pos fromPlayload:(const uint8_t *)payload
+{
+    unsigned int _1x = (unsigned int)(payload[pos + 1] << 8);
+    unsigned int _x1 = (unsigned int)(payload[pos]);
+    return (unsigned int)(_1x | _x1);
+}
+
+- (int)get16BitNumberWithPos:(int)pos fromPlayload:(const int8_t *)payload
 {
     int _1x = (int)(payload[pos + 1] << 8);
     int _x1 = (int)(payload[pos]);

@@ -11,6 +11,7 @@
 @class HeartRateMonitorManager;
 @class HeartRateMonitorDevice;
 @class HeartRateMonitorData;
+@class BioharnessData;
 
 @protocol HeartRateMonitorManagerDelegate<NSObject>
 
@@ -22,4 +23,5 @@
 - (void)heartRateMonitorManager:(HeartRateMonitorManager *)manager didFailToConnectHeartrateMonitorDevice:(HeartRateMonitorDevice *)heartRateMonitorDevice error:(NSError *)error;
 - (void)heartRateMonitorManager:(HeartRateMonitorManager *)manager didFailToMonitorHeartrateMonitorDevice:(HeartRateMonitorDevice *)heartRateMonitorDevice error:(NSError *)error;
 - (void)heartRateMonitorManager:(HeartRateMonitorManager *)manager didReceiveHeartrateMonitorData:(HeartRateMonitorData *)data fromHeartRateMonitorDevice:(HeartRateMonitorDevice *)device;
+- (void)heartRateMonitorManager:(HeartRateMonitorManager *)manager didReceiveBioHarnessData:(BioharnessData *)data fromHeartRateMonitorDevice:(HeartRateMonitorDevice *)device;
 @end

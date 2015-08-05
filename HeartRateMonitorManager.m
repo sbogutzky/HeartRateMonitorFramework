@@ -251,4 +251,10 @@ didFailToConnectPeripheral:(CBPeripheral *)peripheral
     }
 }
 
+- (void)heartRateMonitorDevice:(HeartRateMonitorDevice *)device didReceiveBioharnessData:(BioharnessData *)data {
+    if ([_delegate respondsToSelector:@selector(heartRateMonitorManager:didReceiveBioHarnessData:fromHeartRateMonitorDevice:)]) {
+        [_delegate heartRateMonitorManager:self didReceiveBioHarnessData:data fromHeartRateMonitorDevice:device];
+    }
+}
+
 @end

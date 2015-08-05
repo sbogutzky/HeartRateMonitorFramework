@@ -10,11 +10,13 @@
 
 @class HeartRateMonitorDevice;
 @class HeartRateMonitorData;
+@class BioharnessData;
 
 @protocol HeartRateMonitorDeviceDelegate<NSObject>
 
 @optional
 
 - (void)heartRateMonitorDevice:(HeartRateMonitorDevice *)device didreceiveHeartrateMonitorData:(HeartRateMonitorData *)data;
+- (void)heartRateMonitorDevice:(HeartRateMonitorDevice *)device didReceiveBioharnessData:(BioharnessData *)data;
 
 @end
