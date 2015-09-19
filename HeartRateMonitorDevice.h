@@ -30,7 +30,7 @@ typedef NS_ENUM(NSInteger, HeartRateMonitorDeviceState) {
 @property (nonatomic, strong) NSDate *monitorStartDate;
 @property (nonatomic) int testByte;
 
-- (id)initWithPeripheral:(CBPeripheral *)peripheral;
+- (instancetype)initWithPeripheral:(CBPeripheral *)peripheral NS_DESIGNATED_INITIALIZER;
 - (void)prepareForMonitoring;
 - (void)startMonitoring;
 - (void)stopMonitoring;

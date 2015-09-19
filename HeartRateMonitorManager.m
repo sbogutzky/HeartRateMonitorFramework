@@ -42,7 +42,7 @@
             NSArray *peripherals;
             if (wereConnected) {
                 NSMutableArray *storedHeartRateMonitorDeviceIndentifierStrings = [NSMutableArray arrayWithArray:[[NSUserDefaults standardUserDefaults] objectForKey:@"storedHeartRateMonitorDeviceIndentifierStrings"]];
-                NSMutableArray *heartRateMonitorDeviceIndentifiers = [[NSMutableArray alloc] initWithCapacity:[storedHeartRateMonitorDeviceIndentifierStrings count]];
+                NSMutableArray *heartRateMonitorDeviceIndentifiers = [[NSMutableArray alloc] initWithCapacity:storedHeartRateMonitorDeviceIndentifierStrings.count];
                 for (NSString *storedHeartRateMonitorDeviceIndentifierString in storedHeartRateMonitorDeviceIndentifierStrings) {
                     [heartRateMonitorDeviceIndentifiers addObject:[CBUUID UUIDWithString:storedHeartRateMonitorDeviceIndentifierString]];
                 }
@@ -51,7 +51,7 @@
                 [self didDiscoverPeripherals:peripherals];
             }
             
-            if (peripherals == nil || [peripherals count] == 0) {
+            if (peripherals == nil || peripherals.count == 0) {
                 [self.manager scanForPeripheralsWithServices:@[heartRateServiceUUID, bioharness3ServiceUUID] options:nil];
             }
         }
@@ -100,7 +100,7 @@
                     NSMutableDictionary *details = [NSMutableDictionary dictionary];
                     [details setValue:@"Unknown monitor error" forKey:NSLocalizedDescriptionKey];
                     NSError *error = [NSError errorWithDomain:@"de.bogutzky" code:1 userInfo:details];
-                    NSLog(@"## Error: %@", [error localizedDescription]);
+                    NSLog(@"## Error: %@", error.localizedDescription);
                     [_delegate heartRateMonitorManager:self didFailToMonitorHeartrateMonitorDevice:self.connectedHeartRateMonitorDevice error:error];
                     
                 }
@@ -115,7 +115,7 @@
             NSMutableDictionary *details = [NSMutableDictionary dictionary];
             [details setValue:@"No connected heart rate monitor device" forKey:NSLocalizedDescriptionKey];
             NSError *error = [NSError errorWithDomain:@"de.bogutzky" code:2 userInfo:details];
-            NSLog(@"## Error: %@", [error localizedDescription]);
+            NSLog(@"## Error: %@", error.localizedDescription);
             [_delegate heartRateMonitorManager:self didFailToMonitorHeartrateMonitorDevice:nil error:error];
             
         }
@@ -138,7 +138,7 @@
                     NSMutableDictionary *details = [NSMutableDictionary dictionary];
                     [details setValue:@"Unknown monitor error" forKey:NSLocalizedDescriptionKey];
                     NSError *error = [NSError errorWithDomain:@"de.bogutzky" code:1 userInfo:details];
-                    NSLog(@"## Error: %@", [error localizedDescription]);
+                    NSLog(@"## Error: %@", error.localizedDescription);
                     [_delegate heartRateMonitorManager:self didFailToMonitorHeartrateMonitorDevice:self.connectedHeartRateMonitorDevice error:error];
                     
                 }
@@ -153,7 +153,7 @@
             NSMutableDictionary *details = [NSMutableDictionary dictionary];
             [details setValue:@"No connected heart rate monitor device" forKey:NSLocalizedDescriptionKey];
             NSError *error = [NSError errorWithDomain:@"de.bogutzky" code:2 userInfo:details];
-            NSLog(@"## Error: %@", [error localizedDescription]);
+            NSLog(@"## Error: %@", error.localizedDescription);
             [_delegate heartRateMonitorManager:self didFailToMonitorHeartrateMonitorDevice:nil error:error];
             
         }
@@ -172,7 +172,7 @@
 
 - (void)didDiscoverPeripherals:(NSArray *)peripherals
 {
-    NSMutableArray *heartRateMonitorDevices = [[NSMutableArray alloc] initWithCapacity:[peripherals count]];
+    NSMutableArray *heartRateMonitorDevices = [[NSMutableArray alloc] initWithCapacity:peripherals.count];
     for (CBPeripheral *peripheral in peripherals) {
         HeartRateMonitorDevice *heartRateMonitorDevice = [[HeartRateMonitorDevice alloc] initWithPeripheral:peripheral];
         NSLog(@"### Discovered %@", heartRateMonitorDevice.name);
@@ -202,14 +202,14 @@
     NSString *deviceIdentifier = nil;
     for (NSString *heartRateMonitorDeviceIndentifierString in storedHeartRateMonitorDeviceIndentifierStrings) {
 //        NSLog(@"### %@ == %@", heartRateMonitorDeviceIndentifierString, [peripheral.identifier UUIDString]);
-        if ([heartRateMonitorDeviceIndentifierString isEqualToString:[peripheral.identifier UUIDString]]) {
+        if ([heartRateMonitorDeviceIndentifierString isEqualToString:(peripheral.identifier).UUIDString]) {
             deviceIdentifier = heartRateMonitorDeviceIndentifierString;
         }
     }
     if (deviceIdentifier != nil) {
         [storedHeartRateMonitorDeviceIndentifierStrings removeObject:deviceIdentifier];
     }
-        [storedHeartRateMonitorDeviceIndentifierStrings addObject:[peripheral.identifier UUIDString]];
+        [storedHeartRateMonitorDeviceIndentifierStrings addObject:(peripheral.identifier).UUIDString];
         [[NSUserDefaults standardUserDefaults] setObject:storedHeartRateMonitorDeviceIndentifierStrings forKey:@"storedHeartRateMonitorDeviceIndentifierStrings"];
         [[NSUserDefaults standardUserDefaults] synchronize];
     
@@ -226,7 +226,7 @@ didDisconnectPeripheral:(CBPeripheral *)peripheral
     HeartRateMonitorDevice *heartRateMonitorDevice = [[HeartRateMonitorDevice alloc] initWithPeripheral:peripheral];
     NSLog(@"### Disconnected %@", heartRateMonitorDevice.name);
     if (error) {
-        NSLog(@"### Error: %@", [error localizedDescription]);
+        NSLog(@"### Error: %@", error.localizedDescription);
     }
     if ([_delegate respondsToSelector:@selector(heartRateMonitorManager:didDisconnectHeartrateMonitorDevice:error:)]) {
         [_delegate heartRateMonitorManager:self didDisconnectHeartrateMonitorDevice:heartRateMonitorDevice error:error];
@@ -239,7 +239,7 @@ didFailToConnectPeripheral:(CBPeripheral *)peripheral
                  error:(NSError *)error
 {
     HeartRateMonitorDevice *heartRateMonitorDevice = [[HeartRateMonitorDevice alloc] initWithPeripheral:peripheral];
-    NSLog(@"### Error: %@", [error localizedDescription]);
+    NSLog(@"### Error: %@", error.localizedDescription);
     if ([_delegate respondsToSelector:@selector(heartRateMonitorManager:didFailToConnectHeartrateMonitorDevice:error:)]) {
         [_delegate heartRateMonitorManager:self didFailToConnectHeartrateMonitorDevice:heartRateMonitorDevice error:error];
     }

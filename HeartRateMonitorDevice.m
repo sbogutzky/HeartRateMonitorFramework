@@ -26,7 +26,7 @@
 
 @implementation HeartRateMonitorDevice
 
-- (id)initWithPeripheral:(CBPeripheral *)peripheral
+- (instancetype)initWithPeripheral:(CBPeripheral *)peripheral
 {
     self = [super init];
     if (self) {
@@ -39,7 +39,7 @@
 - (NSString *)name
 {
     if (self.peripheral.name == nil) {
-        return [self.peripheral.identifier UUIDString];
+        return (self.peripheral.identifier).UUIDString;
     }
     return self.peripheral.name;
 }
@@ -129,14 +129,14 @@ didDiscoverCharacteristicsForService:(CBService *)service
 //        NSLog(@"Characteristic: %@", characteristic.UUID);
         
         if (self.first) {
-            self.timestamp = fabs([self.monitorStartDate timeIntervalSinceNow]);
+            self.timestamp = fabs((self.monitorStartDate).timeIntervalSinceNow);
             self.first = NO;
         }
         
         NSData *data = characteristic.value;
         NSUInteger dataSize = data.length;
 //        NSLog(@"### Size: %lu", dataSize);
-        const uint8_t *reportData = [data bytes];
+        const uint8_t *reportData = data.bytes;
         
         if ([characteristic.UUID.description isEqualToString:@"2A37"]) {
             uint8_t flagByte = reportData[0];
@@ -233,8 +233,8 @@ didDiscoverCharacteristicsForService:(CBService *)service
                         double rrIntervalInSeconds = rrIntervalInMillis / 1024.0;
                         double rrTime = self.timestamp;
                         self.timestamp = self.timestamp + rrIntervalInSeconds;
-                        [rrT addObject:[NSNumber numberWithDouble:rrTime]];
-                        [rrI addObject:[NSNumber numberWithDouble:rrIntervalInSeconds]];
+                        [rrT addObject:@(rrTime)];
+                        [rrI addObject:@(rrIntervalInSeconds)];
                     }
                     
                     offset += 2;
@@ -242,7 +242,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
                 
                 heartRateMonitorData.rrTimes = [[NSArray alloc] initWithArray:rrT];
                 heartRateMonitorData.rrIntervals = [[NSArray alloc] initWithArray:rrI];
-                heartRateMonitorData.timestamp = fabs([self.monitorStartDate timeIntervalSinceNow]);
+                heartRateMonitorData.timestamp = fabs((self.monitorStartDate).timeIntervalSinceNow);
             }
             
             // NSLog(@"### ---< %@ >---", heartRateMonitorData);
@@ -254,11 +254,11 @@ didDiscoverCharacteristicsForService:(CBService *)service
         
         if ([characteristic.UUID.description isEqualToString:@"BEFDFF60-C979-11E1-9B21-0800200C9A66"]) {
             BioharnessData *bioharnessData = [[BioharnessData alloc] init];
-            bioharnessData.heartRate = [self getUnsigned8BitNumberWithPos:3 fromPlayload:[data bytes]];
-            bioharnessData.breathRate = [self getUnsigned16BitNumberWithPos:4 fromPlayload:[data bytes]] / 10.0;
-            bioharnessData.skinTemperature = [self getUnsigned16BitNumberWithPos:6 fromPlayload:[data bytes]] / 10.0;
-            bioharnessData.posture = [self get16BitNumberWithPos:8 fromPlayload:[data bytes]];
-            bioharnessData.activityLevel = [self getUnsigned16BitNumberWithPos:10 fromPlayload:[data bytes]] / 100.0;
+            bioharnessData.heartRate = [self getUnsigned8BitNumberWithPos:3 fromPlayload:data.bytes];
+            bioharnessData.breathRate = [self getUnsigned16BitNumberWithPos:4 fromPlayload:data.bytes] / 10.0;
+            bioharnessData.skinTemperature = [self getUnsigned16BitNumberWithPos:6 fromPlayload:data.bytes] / 10.0;
+            bioharnessData.posture = [self get16BitNumberWithPos:8 fromPlayload:data.bytes];
+            bioharnessData.activityLevel = [self getUnsigned16BitNumberWithPos:10 fromPlayload:data.bytes] / 100.0;
             
             if ([_delegate respondsToSelector:@selector(heartRateMonitorDevice:didReceiveBioharnessData:)]) {
                 [_delegate heartRateMonitorDevice:self didReceiveBioharnessData:bioharnessData];
