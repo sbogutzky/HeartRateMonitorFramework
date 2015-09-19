@@ -256,7 +256,7 @@ didDiscoverCharacteristicsForService:(CBService *)service
             BioharnessData *bioharnessData = [[BioharnessData alloc] init];
             bioharnessData.heartRate = [self getUnsigned8BitNumberWithPos:3 fromPlayload:[data bytes]];
             bioharnessData.breathRate = [self getUnsigned16BitNumberWithPos:4 fromPlayload:[data bytes]] / 10.0;
-            bioharnessData.skinTemperatur = [self getUnsigned16BitNumberWithPos:6 fromPlayload:[data bytes]] / 10.0;
+            bioharnessData.skinTemperature = [self getUnsigned16BitNumberWithPos:6 fromPlayload:[data bytes]] / 10.0;
             bioharnessData.posture = [self get16BitNumberWithPos:8 fromPlayload:[data bytes]];
             bioharnessData.activityLevel = [self getUnsigned16BitNumberWithPos:10 fromPlayload:[data bytes]] / 100.0;
             

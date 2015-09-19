@@ -16,8 +16,8 @@
 @property (nonatomic, strong, readonly) NSString *heartRateUnit;
 @property (nonatomic) double breathRate;
 @property (nonatomic, strong, readonly) NSString *breathRateUnit;
-@property (nonatomic) double skinTemperatur;
-@property (nonatomic, strong, readonly) NSString *skinTemperaturUnit;
+@property (nonatomic) double skinTemperature;
+@property (nonatomic, strong, readonly) NSString *skinTemperatureUnit;
 @property (nonatomic) int posture;
 @property (nonatomic, strong, readonly) NSString *postureUnit;
 @property (nonatomic) double activityLevel;
