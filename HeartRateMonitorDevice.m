@@ -9,7 +9,7 @@
 #import "HeartRateMonitorDevice.h"
 #import "HeartRateMonitorDeviceDelegate.h"
 #import "HeartRateMonitorData.h"
-#import "BioharnessData.h"
+//#import "BioharnessData.h"
 
 #define HeartRateValueFormatFlag    0x01
 #define SensorContactStatusFlag     0x06
@@ -252,18 +252,18 @@ didDiscoverCharacteristicsForService:(CBService *)service
             }
         }
         
-        if ([characteristic.UUID.description isEqualToString:@"BEFDFF60-C979-11E1-9B21-0800200C9A66"]) {
-            BioharnessData *bioharnessData = [[BioharnessData alloc] init];
-            bioharnessData.heartRate = [self getUnsigned8BitNumberWithPos:3 fromPlayload:data.bytes];
-            bioharnessData.breathRate = [self getUnsigned16BitNumberWithPos:4 fromPlayload:data.bytes] / 10.0;
-            bioharnessData.skinTemperature = [self getUnsigned16BitNumberWithPos:6 fromPlayload:data.bytes] / 10.0;
-            bioharnessData.posture = [self get16BitNumberWithPos:8 fromPlayload:data.bytes];
-            bioharnessData.activityLevel = [self getUnsigned16BitNumberWithPos:10 fromPlayload:data.bytes] / 100.0;
-            
-            if ([_delegate respondsToSelector:@selector(heartRateMonitorDevice:didReceiveBioharnessData:)]) {
-                [_delegate heartRateMonitorDevice:self didReceiveBioharnessData:bioharnessData];
-            }
-        }
+//        if ([characteristic.UUID.description isEqualToString:@"BEFDFF60-C979-11E1-9B21-0800200C9A66"]) {
+//            BioharnessData *bioharnessData = [[BioharnessData alloc] init];
+//            bioharnessData.heartRate = [self getUnsigned8BitNumberWithPos:3 fromPlayload:data.bytes];
+//            bioharnessData.breathRate = [self getUnsigned16BitNumberWithPos:4 fromPlayload:data.bytes] / 10.0;
+//            bioharnessData.skinTemperature = [self getUnsigned16BitNumberWithPos:6 fromPlayload:data.bytes] / 10.0;
+//            bioharnessData.posture = [self get16BitNumberWithPos:8 fromPlayload:data.bytes];
+//            bioharnessData.activityLevel = [self getUnsigned16BitNumberWithPos:10 fromPlayload:data.bytes] / 100.0;
+//            
+//            if ([_delegate respondsToSelector:@selector(heartRateMonitorDevice:didReceiveBioharnessData:)]) {
+//                [_delegate heartRateMonitorDevice:self didReceiveBioharnessData:bioharnessData];
+//            }
+//        }
     }
 }
 
