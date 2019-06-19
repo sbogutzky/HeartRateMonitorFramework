@@ -37,7 +37,7 @@
     CBUUID *heartRateServiceUUID = [CBUUID UUIDWithString:@"180D"];
     CBUUID *bioharness3ServiceUUID = [CBUUID UUIDWithString:@"BEFDFF20-C979-11E1-9B21-0800200C9A66"];
     switch (self.state) {
-        case CBCentralManagerStatePoweredOn: {
+        case CBManagerStatePoweredOn: {
             
             NSArray *peripherals;
             if (wereConnected) {
